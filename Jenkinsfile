@@ -1,10 +1,28 @@
-node {
-    stage ('Checkout') {
-        git 'https://github.com/takwa7050/ICExam.git'
+pipeline {
+    agent any
+    stages {
+        stage ('Compile Stage') {
+
+            steps {
+                withMaven(maven : 'apache-maven-3.6.2') {
+                    bat 'mvn clean compile'
+                }
+            }
         }
-    
-    stage ('Compile Stage') {
-        def mvnHome = tool name: 'maven-3' , type: 'maven'
-        sh "${mvnHome}/bin/mvn package" 
+        stage ('Testing Stage') {
+
+            steps {
+                withMaven(maven : 'apache-maven-3.6.2') {
+                    bat 'mvn test'
+                }
+            }
         }
+        stage ('Install Stage') {
+            steps {
+                withMaven(maven : 'apache-maven-3.6.2') {
+                    bat 'mvn install'
+                }
+            }
+        }
+    }
 }
