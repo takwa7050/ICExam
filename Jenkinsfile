@@ -1,10 +1,12 @@
 pipeline {
-    agent {
+
+        
+         agent {
         label "master"
     }
     tools {
         // Note: this should match with the tool name configured in your jenkins instance (JENKINS_URL/configureTools/)
-        maven "Maven 3.6.2"
+        maven "fileMaven"
     }
     environment {
         // This can be nexus3 or nexus2
@@ -14,35 +16,27 @@ pipeline {
         // Where your Nexus is running
         NEXUS_URL = "127.0.0.1:8081"
         // Repository where we will upload the artifact
-        NEXUS_REPOSITORY = "repository-example"
+        NEXUS_REPOSITORY = "maven-releases"
         // Jenkins credential id to authenticate to Nexus OSS
-        NEXUS_CREDENTIAL_ID = "nexus-credentials"
+        NEXUS_CREDENTIAL_ID = "nexusId"
     }
     stages {
-        stage("clone code") {
+            
+          
+            
+        stage('Checkout') {
             steps {
-                script {
-                    // Let's clone the source
-                    git 'https://github.com/takwa7050/ICExam.git';
-                }
+               git 'https://github.com/takwa7050/ICExam.git'
             }
         }
-        stage("mvn build") {
+        stage('Build') {
             steps {
-                script {
-                    // If you are using Windows then you should use "bat" step
-                    // Since unit testing is out of the scope we skip them
-                    sh "mvn install"
-                }
+               bat label: '', script: ' mvn install'
             }
         }
-        stage("mvn test") {
+        stage('Test') {
             steps {
-                script {
-                    // If you are using Windows then you should use "bat" step
-                    // Since unit testing is out of the scope we skip them
-                    sh "mvn test"
-                }
+                bat label: '', script: ' mvn test'
             }
         }
         stage("publish to nexus") {
@@ -86,6 +80,19 @@ pipeline {
                     }
                 }
             }
+                
+               
+        }
+            
+               stage('Email Notification') {
+          steps {
+                  mail bcc: '', body: ''' Welcome to jenkins email alerts ,
+                  Checkout .. Success/Build .. Success/Test .. Success/Publish to nexus .. Success .
+.
+Thanks ''', cc: '', from: '', replyTo: '', subject: 'Jenkins notification ', to: 'yosrabouj2020@gmail.com'
+          }
+      
         }
     }
+    
 }
